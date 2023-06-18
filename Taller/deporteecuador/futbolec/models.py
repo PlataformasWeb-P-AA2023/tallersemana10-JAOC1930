@@ -13,8 +13,8 @@ class Equipof(models.Model):
 class Jugador(models.Model):
     nombre = models.CharField('Nombre Jugador', max_length=40)
     posicion = models.CharField(max_length=50)
-    camiseta = models.ImageField('Numero de camiseta')
-    sueldo = models.DecimalField()
+    camiseta = models.IntegerField('Numero de camiseta')
+    sueldo = models.DecimalField(max_digits=10, decimal_places=2)
     equipo = models.ForeignKey(Equipof, on_delete=models.CASCADE, related_name="jugadores")
 
     def __str__(self):
@@ -24,7 +24,7 @@ class Jugador(models.Model):
 class Campeonato(models.Model):
     nombre = models.CharField('Nombre del campeonato', max_length=50)
     nombreausp = models.CharField('Nombre del auspiciante', max_length=50)
-    equipos = models.ManyToManyField('Equipof', through='Campeonato_equipo')
+    equipos = models.ManyToManyField(Equipof, through='Campeonato_equipo')
 
     def __str__(self):
         return "Nombre: %s - Auspiciante: %s" % (self.nombre, self.nombreausp)
