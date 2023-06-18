@@ -1,24 +1,57 @@
 from django.db import models
 
-class Equipof(models.Model):
-    nombre = models.CharField('Nombre del equipo', max_length=40)
-    siglas = models.CharField(max_length=30)
-    tusername = models.CharField('Usuario de Twitter', max_length=30)
-    campeonatos = models.ManyToManyField('Campeonato', through='Campeonato_equipo')
+# Create your models here.
 
-class Jugador(models.Model):
-    nombre = models.CharField('Nombre Jugador', max_length=40)
-    posicion = models.CharField(max_length=50)
-    camiseta = models.ImageField('Numero de camiseta')
-    sueldo = models.DecimalField()
-    equipo = models.ForeignKey(Equipof, on_delete=models.CASCADE, related_name="jugadores")
+class Estudiante(models.Model):
+    opciones_tipo_estudiante = (
+        ('becado', 'Estudiante Becado'),
+        ('no-becado', 'Estudiante No Becado'),
+        )
 
-class Campeonato(models.Model):
-    nombre = models.CharField('Nombre del campeonato', max_length=50)
-    nombreausp = models.CharField('Nombre del auspiciante', max_length=50)
-    equipos = models.ManyToManyField('Equipof', through='Campeonato_equipo')
+    cedula = models.CharField(max_length=30, unique=True)
+    apellido = models.CharField(max_length=30, blank=True)  # el campo puede
+                                                            # ser vacio
 
-class Campeonato_equipo(models.Model):
-    equipo = models.ForeignKey(Equipof, on_delete=models.CASCADE)
-    campeonato = models.ForeignKey(Campeonato, on_delete=models.CASCADE)
-    anio = models.IntegerField()
+    nombre = models.CharField(max_length=30)
+    edad = models.IntegerField("edad de estudiante") # Verbose field names
+    tipo_estudiante = models.CharField(max_length=30, \
+            choices=opciones_tipo_estudiante)
+    modulos = models.ManyToManyField('Modulo', through='Matricula')
+
+
+    def __str__(self):
+        return "%s - %s - %s - edad: %d - tipo: %s" % (self.nombre,
+                self.apellido,
+                self.cedula,
+                self.edad,
+                self.tipo_estudiante)
+
+
+class Modulo(models.Model):
+    """
+    """
+    opciones_modulo = (
+        ('1', 'Primero'),
+        ('2', 'Segundo'),
+        )
+
+    nombre = models.CharField(max_length=30, \
+            choices=opciones_modulo)
+    estudiantes = models.ManyToManyField(Estudiante, through='Matricula')
+
+    def __str__(self):
+        return "Módulo: %s" % (self.nombre)
+
+
+class Matricula(models.Model):
+    """
+    """
+    estudiante = models.ForeignKey(Estudiante, related_name='lasmatriculas',
+            on_delete=models.CASCADE)
+    modulo = models.ForeignKey(Modulo, related_name='lasmatriculas',
+            on_delete=models.CASCADE)
+    comentario = models.CharField(max_length=200)
+
+    def __str__(self):
+        return "Matricula: Estudiante(%s) - Modulo(%s)" % \
+                (self.estudiante, self.modulo.nombre)
